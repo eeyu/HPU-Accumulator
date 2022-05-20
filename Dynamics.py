@@ -84,7 +84,7 @@ class HPUDynamics(Dynamics):
         # The math
         P_S = self.convertCurrentToSupplyPressure(state["I"])
         
-        Q_T = inputSignal["Q_T"] * 1.66667e-5 # conversion to m3/s
+        Q_T = inputSignal["Q_T"] # conversion to m3/s
         P_A = state["P_A"]
         V_A = self.getAccumulatorVolumeFromPressure(P_A)
         Q_A = self.getAccumulatorFlowFromPressure(P_A, P_S, self.lastQ_A)

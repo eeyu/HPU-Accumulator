@@ -28,7 +28,7 @@ class FlowSignalFromFile(InputSignalProvider):
         
     def getSignal(self, time):
         # input is in L/min
-        return {"Q_T" : np.interp(time, self.timeHistory, self.flowHistory)}
+        return {"Q_T" : np.interp(time, self.timeHistory, self.flowHistory)  * 1.66667e-5 } # conversion to m3/s
         
     def generateTimeHistory(self, dt, num):
         timeHistory = np.arange(num)
