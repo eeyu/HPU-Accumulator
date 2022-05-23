@@ -69,6 +69,7 @@ class HPUDynamicsNoNozzle(Dynamics):
         self.parameters = parameters
         self.physicsToolbox = HPUDynamicsNoNozzlePhysics(parameters)
         self.useSteadyStateCurrent=useSteadyStateCurrent
+        # All of these get plotted. they serve a similar function to yovariables
         self.stateUnitProperties = {# Integrables
                                     "I"   : StateUnitProperties("motorCurrent", "A", "A", 1),
                                     "Q_S" : StateUnitProperties("supplyFlowOut", "m3/s", "L/min", 60000),
@@ -80,11 +81,11 @@ class HPUDynamicsNoNozzle(Dynamics):
                                     # External signals
                                     "Q_T" : StateUnitProperties("totalFlowOut", "m3/s", "L/min", 60000),
                                     "Volt" : StateUnitProperties("motorVoltage", "V", "V", 1),
+                                    'Fail' : StateUnitProperties("simulationFailed", "-", "-", 1),
                                 }
         self.externalSignals = externalSignals
 
     def getInitialFullStateFromIntegrables(self, integrableStates : dict):
-        # this isn't the best way to do things, but the only way I could think of doing things
         t = 0
         P_S = self.physicsToolbox.calculateAccumulatorPressureFromVolume(integrableStates["V_A"])
         integrableStates["P_S"] = P_S
@@ -102,6 +103,7 @@ class HPUDynamicsNoNozzle(Dynamics):
             "dQ_S" : 0,
             "Q_T" : Q_T,
             "Volt" : V,
+            "Fail" : 0
         }
 
         return output
@@ -119,11 +121,17 @@ class HPUDynamicsNoNozzle(Dynamics):
         V_A_candidate = lastFullState["V_A"] + dV_A_candidate * dt # plus or minus?
 
         # if accumulator has been depleted, calculate with no accumulator
+        # don't trust these values
         if V_A_candidate < 0:
             Q_A = lastFullState["V_A"] / dt
             V_A = 0
             Q_S = Q_T - Q_A
             dQ_S = (Q_S - lastFullState["Q_S"]) / dt
+            if self.useSteadyStateCurrent:
+                I = self.physicsToolbox.calculateSteadyStateCurrentFromVoltage(V, Q_S)
+            else:
+                dI = self.physicsToolbox.calculateDCurrent(lastFullState["I"], lastFullState["Q_S"], V)
+                I = lastFullState["I"] + dI * dt
             P_S = self.physicsToolbox.calculateSupplyPressureBackwards(I, Q_S, dQ_S)
         else: # else, continue with calculations
             Q_S = Q_S_candidate
@@ -131,12 +139,18 @@ class HPUDynamicsNoNozzle(Dynamics):
             V_A = V_A_candidate
             dQ_S = dQ_S_candidate
             P_S = self.physicsToolbox.calculateAccumulatorPressureFromVolume(V_A)
+            if self.useSteadyStateCurrent:
+                I = self.physicsToolbox.calculateSteadyStateCurrentFromVoltage(V, Q_S)
+            else:
+                dI = self.physicsToolbox.calculateDCurrent(lastFullState["I"], lastFullState["Q_S"], V)
+                I = lastFullState["I"] + dI * dt
 
-        if self.useSteadyStateCurrent:
-            I = self.physicsToolbox.calculateSteadyStateCurrentFromVoltage(V, Q_S)
+        if P_S < self.parameters["minimumSupplyPressure"]:
+            fail = 1
         else:
-            dI = self.physicsToolbox.calculateDCurrent(lastFullState["I"], lastFullState["Q_S"], V)
-            I = lastFullState["I"] + dI * dt
+            fail = 0
+        if lastFullState["Fail"] == 1:
+            fail = 1
             
         output = {"P_S" : P_S,
                 "Q_A" : Q_A,
@@ -146,6 +160,7 @@ class HPUDynamicsNoNozzle(Dynamics):
                 "Q_T" : Q_T,
                 "I" : I,
                 "Volt" : V,
+                "Fail" : fail,
             }
 
         return output

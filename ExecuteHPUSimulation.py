@@ -18,8 +18,12 @@ import scipy.signal
 
 from pyqtgraph.Qt import QtGui, QtCore
 
-filename = "./data/forward1.csv"
-nameToHeaderMap = NameToHeaderMap.realMap
+# back_ and forward_ use realMap. all others use scriptSimMap
+# filename = "./data/quickWalk.csv"
+# nameToHeaderMap = NameToHeaderMap.scriptSimMap 
+filename = "./data/forward6.csv"
+nameToHeaderMap = NameToHeaderMap.realMap 
+
 parameters = {# Desired/Controller
               "operatingPressure" : uc.PSIToPascal(3000.0), #pa
               "minimumSupplyPressure" : uc.PSIToPascal(2400.0),
@@ -67,8 +71,8 @@ initialIntegrableState = {"V_A" : physicsToolbox.calculateAccumulatorVolumeFromP
 initialState = dynamics.getInitialFullStateFromIntegrables(initialIntegrableState)
 
 dt = 0.001
-maxTime = 7
-# maxTime = flowProvider.getMaxTime()
+# maxTime = 7
+maxTime = flowProvider.getMaxTime()
 timeHistory, outputHistory = simulation.simulate(initialState, dt, maxTime)
 
 def printOutputsAtIndex(i, outputHistory):
