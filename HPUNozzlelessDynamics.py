@@ -61,6 +61,20 @@ class HPUDynamicsNoNozzlePhysics:
         return P_S * self.parameters["pumpDisplacement"] * self.parameters["motorResistance"] / self.parameters["motorTorqueConstant"]
     
 class HPUDynamicsNoNozzle(Dynamics):
+    # All of these get plotted. they serve a similar function to yovariables
+    stateUnitProperties = {# Integrables
+                                "I"   : StateUnitProperties("motorCurrent", "A", "A", 1),
+                                "Q_S" : StateUnitProperties("supplyFlowOut", "m3/s", "L/min", 60000),
+                                "V_A" : StateUnitProperties("accumulatorFluidVolume", "m3", "L", 1000.),
+                                # Equality
+                                "Q_A" : StateUnitProperties("accumulatorFlowOut", "m3/s", "L/min", 60000),
+                                "P_S" : StateUnitProperties("supplyPressure", "Pa", "bar", 1e-5),
+                                "dQ_S" : StateUnitProperties("supplyFlowAccelerationOut", "m3/s^2", "L/min^2", 3600000),
+                                # External signals
+                                "Q_T" : StateUnitProperties("totalFlowOut", "m3/s", "L/min", 60000),
+                                "Volt" : StateUnitProperties("motorVoltage", "V", "V", 1),
+                                'Fail' : StateUnitProperties("simulationFailed", "-", "-", 1),
+                            }
     def __init__(self, parameters : dict, externalSignals : ExternalSignalCollection, useSteadyStateCurrent=False):
         parameters["initialGasPVConstant"] = HPUDynamicsNoNozzlePhysics.calculateAccumulatorGasPVConstant(
                                                 parameters["accumulatorPrechargePressure"], 
@@ -69,20 +83,7 @@ class HPUDynamicsNoNozzle(Dynamics):
         self.parameters = parameters
         self.physicsToolbox = HPUDynamicsNoNozzlePhysics(parameters)
         self.useSteadyStateCurrent=useSteadyStateCurrent
-        # All of these get plotted. they serve a similar function to yovariables
-        self.stateUnitProperties = {# Integrables
-                                    "I"   : StateUnitProperties("motorCurrent", "A", "A", 1),
-                                    "Q_S" : StateUnitProperties("supplyFlowOut", "m3/s", "L/min", 60000),
-                                    "V_A" : StateUnitProperties("accumulatorFluidVolume", "m3", "L", 1000.),
-                                    # Equality
-                                    "Q_A" : StateUnitProperties("accumulatorFlowOut", "m3/s", "L/min", 60000),
-                                    "P_S" : StateUnitProperties("supplyPressure", "Pa", "bar", 1e-5),
-                                    "dQ_S" : StateUnitProperties("supplyFlowAccelerationOut", "m3/s^2", "L/min^2", 3600000),
-                                    # External signals
-                                    "Q_T" : StateUnitProperties("totalFlowOut", "m3/s", "L/min", 60000),
-                                    "Volt" : StateUnitProperties("motorVoltage", "V", "V", 1),
-                                    'Fail' : StateUnitProperties("simulationFailed", "-", "-", 1),
-                                }
+
         self.externalSignals = externalSignals
 
     def getInitialFullStateFromIntegrables(self, integrableStates : dict):
@@ -121,7 +122,7 @@ class HPUDynamicsNoNozzle(Dynamics):
         V_A_candidate = lastFullState["V_A"] + dV_A_candidate * dt # plus or minus?
 
         # if accumulator has been depleted, calculate with no accumulator
-        # don't trust these values
+        # don't trust these values. differentiation is bad
         if V_A_candidate < 0:
             Q_A = lastFullState["V_A"] / dt
             V_A = 0
@@ -166,4 +167,4 @@ class HPUDynamicsNoNozzle(Dynamics):
         return output
 
     def getStateUnitProperties(self):
-        return self.stateUnitProperties
+        return HPUDynamicsNoNozzle.stateUnitProperties

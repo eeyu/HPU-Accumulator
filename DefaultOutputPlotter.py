@@ -34,6 +34,7 @@ class DefaultOutputPlotter():
         
         # set up containers
         self.plots = []
+        self.models = {}
         self.docks = []
         self.layouts = []
         self.sliders = []
@@ -63,19 +64,18 @@ class DefaultOutputPlotter():
         # layout.nextRow()
         
         lines = []
-        slider = SliderWithLines(lines, 0, self.timeHistory.size)
+        # slider = SliderWithLines(lines, 0, self.timeHistory.size)
         
-        layout.addWidget(slider.slider, colspan=2)
+        # layout.addWidget(slider.slider, colspan=2)
         layout.nextRow()
         
-        subPlots = []
         for logName in self.logNamesToPlot:
             # Main Plot
             p1 = pg.PlotWidget(title=self.stateUnitProperties[logName].name)
             p1.setLabel('bottom', "time" )
             p1.setLabel('left', logName, units = self.stateUnitProperties[logName].preferredUnits )
             p1.addLegend()
-            p1.plot(y=self.outputHistory[logName],
+            model = p1.plot(y=self.outputHistory[logName],
                     x=self.timeHistory,
                     pen=self.defaultColor, 
                     name = 'time')
@@ -90,7 +90,8 @@ class DefaultOutputPlotter():
             
             # layout stuff
             layout.addWidget(p1)
-            subPlots.append(p1)
+            self.plots.append(p1)
+            self.models[logName] = model
             
             rowIndex += 1
             if (rowIndex == 3):
@@ -98,15 +99,20 @@ class DefaultOutputPlotter():
                 layout.nextRow()
                 
                 
-        slider.lines = lines
+        # slider.lines = lines
         d1.addWidget(layout)
         
         self.area.addDock(d1, 'left')
 
         # Save everything
         self.docks.append(d1)
-        self.layouts.append(layout)
-        self.plots.append(subPlots)
-        self.sliders.append(slider)
+        self.layout = layout
+        # self.sliders.append(slider)
         
         self.win.show()
+
+    def getModelsMap(self):
+        return self.models
+
+    def getLayout(self):
+        return self.layout

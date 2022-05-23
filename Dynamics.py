@@ -25,7 +25,7 @@ class Dynamics(ABC):
         return convertedOutput
     
     @abstractmethod
-    def getStateUnitProperties(self):
+    def getStateUnitProperties():
         pass
 
     def getFullStateNames(self):
