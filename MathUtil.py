@@ -7,10 +7,12 @@ Created on Fri Mar 25 13:45:09 2022
 
 import numpy as np
 
-def findNearest(array, value):
+def findNearestValueInArray(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
+
+
 
 # def interpolateFromOrderedDrivingArray(drivingArray, value, drivenArray):
     # nearestDrivingValue, nearestDrivingIndex = findNearest(drivingArray, value)

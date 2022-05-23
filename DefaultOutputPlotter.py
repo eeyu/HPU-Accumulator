@@ -10,7 +10,7 @@ import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.dockarea import *
 from pyqSlider import Slider
-from Dynamics import ParameterProperties
+from StateUnitProperties import StateUnitProperties
 
 class SliderWithLines:
     def __init__(self, lines, minVal, maxVal):
@@ -24,13 +24,13 @@ class SliderWithLines:
             line.setValue(idx)
 
 class DefaultOutputPlotter():
-    def __init__(self, name, timeHistory, outputHistory, parameterProperties):
+    def __init__(self, name, timeHistory, outputHistory, stateUnitProperties : StateUnitProperties):
         self.name = name
         self.logNamesToPlot = outputHistory.keys()
         pg.setConfigOption('foreground', 'k')
         pg.setConfigOption('background', 'w')
         
-        self.parameterProperties = parameterProperties
+        self.stateUnitProperties = stateUnitProperties
         
         # set up containers
         self.plots = []
@@ -71,9 +71,9 @@ class DefaultOutputPlotter():
         subPlots = []
         for logName in self.logNamesToPlot:
             # Main Plot
-            p1 = pg.PlotWidget(title=self.parameterProperties[logName].name)
+            p1 = pg.PlotWidget(title=self.stateUnitProperties[logName].name)
             p1.setLabel('bottom', "time" )
-            p1.setLabel('left', logName, units = self.parameterProperties[logName].preferredUnits )
+            p1.setLabel('left', logName, units = self.stateUnitProperties[logName].preferredUnits )
             p1.addLegend()
             p1.plot(y=self.outputHistory[logName],
                     x=self.timeHistory,

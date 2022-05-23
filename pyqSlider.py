@@ -28,7 +28,7 @@ class Slider(QWidget):
         
         self.slider = QSlider(self)
         self.slider.setOrientation(Qt.Horizontal)
-        self.slider.setTickInterval(1.0)
+        self.slider.setTickInterval(1)
         self.horizontalLayout.addWidget(self.slider)
         spacerItem1 = QSpacerItem(0, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
