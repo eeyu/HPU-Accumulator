@@ -12,8 +12,6 @@ def findNearestValueInArray(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
-
-
 # def interpolateFromOrderedDrivingArray(drivingArray, value, drivenArray):
     # nearestDrivingValue, nearestDrivingIndex = findNearest(drivingArray, value)
     # nearestValueIsLarger = nearestDrivingValue > value

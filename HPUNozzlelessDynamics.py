@@ -5,10 +5,12 @@ Created on Mon Apr 18 10:31:32 2022
 @author: eyu
 """
 
+# All math can be referenced here:
+# https://docs.google.com/presentation/d/1F06h3KazdXrJqL3oXz7IlBEz1O0cy0PYbd30vnif52o/edit#slide=id.g12aaf72706b_0_158
+
 from Dynamics import Dynamics
 from StateUnitProperties import StateUnitProperties
 import numpy as np
-from DerivativeMonitor import DerivativeMonitor
 from ExternalSignal import ExternalSignalCollection
 
 class HPUDynamicsNoNozzlePhysics:
@@ -54,6 +56,9 @@ class HPUDynamicsNoNozzlePhysics:
             - self.parameters["motorViscousConstant"] * motorFlow / self.parameters["pumpDisplacement"]
             - self.parameters["motorInertia"] / self.parameters["pumpDisplacement"] * dMotorFlow)
             / (self.parameters["pumpDisplacement"]))
+
+    def getVoltageToMaintainSupplyPressureAtSteadyState(self, P_S):
+        return P_S * self.parameters["pumpDisplacement"] * self.parameters["motorResistance"] / self.parameters["motorTorqueConstant"]
     
 class HPUDynamicsNoNozzle(Dynamics):
     def __init__(self, parameters : dict, externalSignals : ExternalSignalCollection, useSteadyStateCurrent=False):

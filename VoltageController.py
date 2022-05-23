@@ -34,14 +34,15 @@ class MaxPressureVoltageController(VoltageController):
 
 # Voltage scales between maxVoltage and 0
 class ProportionalVoltageController(VoltageController):
-    def __init__(self, maxVoltage, maxPressure, minPressure):
+    def __init__(self, maxVoltage, maxPressure, minPressure, minVoltage=0):
         self.maxVoltage = maxVoltage
         self.maxPressure = maxPressure
         self.minPressure = minPressure
+        self.minVoltage = minVoltage
         
     def getSignal(self, state, t):
         pressure = state["P_S"]
-        voltage = np.interp(pressure, [self.minPressure, self.maxPressure], [self.maxVoltage, 0])
+        voltage = np.interp(pressure, [self.minPressure, self.maxPressure], [self.maxVoltage, self.minVoltage])
         if voltage > self.maxVoltage:
             return self.maxVoltage
         elif voltage < 0:

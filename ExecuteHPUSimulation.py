@@ -41,21 +41,22 @@ parameters = {# Desired/Controller
               "fluidViscosity" : 0.001, #double check
               "accumulatorNozzleLength" : 0.020, #m
               }
+physicsToolbox = HPUDynamicsNoNozzlePhysics(parameters)
 
 flowProvider = FlowSignalFromFile(filename, nameToHeaderMap, samplingDt=0.001)
-#flowProvider = ConstantFlowSignal(0)
+# flowProvider = ConstantFlowSignal(0)
 # voltageController = ConstantVoltageController(parameters["motorVoltage"])
 # voltageController = MaxPressureVoltageController(parameters["motorVoltage"], maxPressure=parameters["operatingPressure"])
 voltageController = ProportionalVoltageController(maxVoltage=parameters["motorVoltage"], 
     maxPressure=parameters["operatingPressure"], 
-    minPressure=parameters["minimumSupplyPressure"])
+    minPressure=parameters["minimumSupplyPressure"],
+    minVoltage=physicsToolbox.getVoltageToMaintainSupplyPressureAtSteadyState(parameters["operatingPressure"]))
+# print(physicsToolbox.getVoltageToMaintainSupplyPressureAtSteadyState(parameters["operatingPressure"]))
 # voltageController = StepVoltageController(parameters["motorVoltage"], 1)
 externalSignals = ExternalSignalCollection()
 externalSignals.addSignalProvider(voltageController)
 externalSignals.addSignalProvider(flowProvider)
 dynamics = HPUDynamicsNoNozzle(parameters, externalSignals, useSteadyStateCurrent=False)
-
-physicsToolbox = HPUDynamicsNoNozzlePhysics(parameters)
 
 simulation = Simulation(dynamics)
 
@@ -82,11 +83,11 @@ def filterOutputs(outputHistory, dt):
         filteredOutputs[key] = scipy.signal.sosfilt(bfilt, outputHistory[key])
     return filteredOutputs
 
-for i in range(2):
-    printOutputsAtIndex(i, outputHistory)
+# for i in range(2):
+#     printOutputsAtIndex(i, outputHistory)
 
 filteredOutputs = filterOutputs(outputHistory, dt)
-plotter = DefaultOutputPlotter("unt", timeHistory, outputHistory, dynamics.getStateUnitProperties())
+plotter = DefaultOutputPlotter("untitled", timeHistory, outputHistory, dynamics.getStateUnitProperties())
 # plotter = DefaultOutputPlotter("unt", timeHistory, filteredOutputs, dynamics.getStateUnitProperties())
 if __name__ == '__main__':
     import sys
