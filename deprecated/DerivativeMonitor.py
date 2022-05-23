@@ -1,4 +1,5 @@
 import numpy as np
+# no longer used
 
 class DerivativeMonitor:
     def __init__(self, initialValue=0, firstDerivativeIsZero=False):

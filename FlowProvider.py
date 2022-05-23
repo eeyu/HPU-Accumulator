@@ -8,29 +8,30 @@ Created on Fri Mar 25 13:25:04 2022
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
+from ExternalSignal import ExternalSignalProvider
 
-class InputSignalProvider(ABC):
-    @abstractmethod
-    def getSignal(self, time):
-        pass
- 
-class FlowSignalFromFile(InputSignalProvider):
-    def __init__(self, filename, nameToHeaderMap, dt=None):
+class FlowProvider(ExternalSignalProvider):
+    def getName(self):
+        return "Q_T"
+
+# dt sampling rate
+class FlowSignalFromFile(FlowProvider):
+    def __init__(self, filename, nameToHeaderMap, samplingDt=None):
         data = pd.read_csv(filename)
         self.flowHistory = np.array(data[nameToHeaderMap["totalFlow"]].values.tolist())
-        if dt is not None:
+        if samplingDt is not None:
             numHistory = self.flowHistory.size
-            self.timeHistory = self.generateTimeHistory(dt, numHistory)
+            self.timeHistory = self.__generateTimeHistory(samplingDt, numHistory)
         else:
             self.timeHistory = np.array(data[nameToHeaderMap["time"]].values.tolist())
             
         self.time = 0
         
-    def getSignal(self, time):
+    def getSignal(self, state, t):
         # input is in L/min
-        return {"Q_T" : np.interp(time, self.timeHistory, self.flowHistory)  * 1.66667e-5 } # conversion to m3/s
+        return np.interp(t, self.timeHistory, self.flowHistory)  * 1.66667e-5 # conversion to m3/s
         
-    def generateTimeHistory(self, dt, num):
+    def __generateTimeHistory(self, dt, num):
         timeHistory = np.arange(num)
         timeHistory = timeHistory * dt
         return timeHistory
@@ -38,10 +39,9 @@ class FlowSignalFromFile(InputSignalProvider):
     def getMaxTime(self):
         return self.timeHistory[-1]
 
-class ConstantFlowSignal(InputSignalProvider):
-    def __init__(self, value, dt=None):
+class ConstantFlowSignal(FlowProvider):
+    def __init__(self, value):
         self.value = value
         
-    def getSignal(self, time):
-        # input is in L/min
-        return {"Q_T" : self.value}
+    def getSignal(self, state, t):
+        return self.value

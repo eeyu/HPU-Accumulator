@@ -40,7 +40,7 @@ class SpringDynamics(Dynamics):
     def getStateDims(self):
         return 2
     
-    def getOutputNames(self):
+    def getFullStateNames(self):
         return self.parameterProperties.keys()
 
     def getDState(self, output : dict, t):
@@ -97,7 +97,7 @@ class SpringlessDynamics(Dynamics):
     def getStateDims(self):
         return 0
     
-    def getOutputNames(self):
+    def getFullStateNames(self):
         return self.parameterProperties.keys()
 
         

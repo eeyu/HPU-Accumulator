@@ -7,46 +7,35 @@ Created on Fri Mar 25 10:39:39 2022
 
 import numpy as np
 from Dynamics import Dynamics
-from InputSignalProvider import InputSignalProvider
-
 
 class Simulation():
-    def __init__(self, dynamics : Dynamics, inputSignalProvider : InputSignalProvider):
+    def __init__(self, dynamics : Dynamics):
         self.dynamics = dynamics
-        self.stateDims = dynamics.getStateDims()
-        self.inputSignalProvider = inputSignalProvider
         
-    def simulate(self, initialState, dt, maxTime):
+    def simulate(self, initialFullState, dt, maxTime):
         numSamples = int(maxTime//dt) + 1
-        outputHistory = self.generateEmptyOutputHistory(numSamples)
+        fullStateHistory = self.generateEmptyFullStateHistory(numSamples)
         timeHistory = np.empty(numSamples)
         
-        state = initialState
+        fullState = initialFullState
         t = 0
         for i in range(numSamples):
-            # interpret current state
-            inputSignal = self.inputSignalProvider.getSignal(t)
-            # state, output = self.dynamics.getNextState(state, dt, inputSignal)
-            output = self.dynamics.getOutputForCurrentState(state, inputSignal, t)
-            
-            scaledOutput = self.dynamics.convertOutputToPreferredUnits(output)
-            self.addOutputToHistory(scaledOutput, outputHistory, i)
+            fullState = self.dynamics.getNextFullState(fullState, dt, t)
+
+            scaledFullState = self.dynamics.convertFullStateToPreferredUnits(fullState)
+            self.addFullStateToHistory(scaledFullState, fullStateHistory, i)
             timeHistory[i] = t
-            
-            # prepare next state
-            dstate = self.dynamics.getDState(output, t)
-            state = Dynamics.addStates(state, Dynamics.scaleState(dt, dstate))
             t += dt
         
-        return (timeHistory, outputHistory)
+        return (timeHistory, fullStateHistory)
     
-    def addOutputToHistory(self, output, outputHistory, i):
-        keys = self.dynamics.getOutputNames()
+    def addFullStateToHistory(self, output, outputHistory, i):
+        keys = self.dynamics.getFullStateNames()
         for key in keys:
             outputHistory[key][i] = output[key]
             
-    def generateEmptyOutputHistory(self, numSamples):
-        keys = self.dynamics.getOutputNames()
+    def generateEmptyFullStateHistory(self, numSamples):
+        keys = self.dynamics.getFullStateNames()
         outputHistory = {}
         for key in keys:
             outputHistory[key] = np.empty(numSamples)

@@ -7,7 +7,7 @@ Created on Fri Mar 25 13:57:24 2022
 
 from Simulation import Simulation
 from SpringDynamics import SpringDynamics, SpringlessDynamics
-from InputSignalProvider import FlowSignalFromFile, ConstantFlowSignal
+from FlowProvider import FlowSignalFromFile, ConstantFlowSignal
 from DefaultOutputPlotter import DefaultOutputPlotter
 from NameToHeaderMap import NameToHeaderMap
 import scipy.signal
@@ -30,7 +30,7 @@ parameters = {"springConstant" : 500, #N/m
               "inputScaling" : 100
               }
 
-flowProvider = FlowSignalFromFile(filename, nameToHeaderMap, dt=0.001)
+flowProvider = FlowSignalFromFile(filename, nameToHeaderMap, samplingDt=0.001)
 # flowProvider = ConstantFlowSignal(1)
 
 springDynamics = SpringDynamics(parameters)
