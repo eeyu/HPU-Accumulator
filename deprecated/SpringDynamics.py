@@ -1,6 +1,6 @@
 from re import X
 from DerivativeMonitor import DerivativeMonitor
-from Dynamics import Dynamics, ParameterProperties
+from abstractDynamics.Dynamics import Dynamics, ParameterProperties
 
 class SpringDynamics(Dynamics):
     def __init__(self, parameters):

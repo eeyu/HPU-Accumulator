@@ -5,7 +5,7 @@ Created on Fri Mar 25 11:28:45 2022
 @author: eyu
 """
 from abc import ABC, abstractmethod
-from StateUnitProperties import StateUnitProperties
+from abstractDynamics.StateUnitProperties import StateUnitProperties
 import numpy as np
 
 class Dynamics(ABC):  
@@ -20,7 +20,7 @@ class Dynamics(ABC):
     def convertFullStateToPreferredUnits(self, fullState):
         parameterProperties = self.getStateUnitProperties()
         convertedOutput = {}
-        for key in fullState.keys():
+        for key in parameterProperties.keys():
             convertedOutput[key] = fullState[key] * parameterProperties[key].scalingSIToPreferred
         return convertedOutput
     

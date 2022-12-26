@@ -5,11 +5,11 @@ Created on Fri Mar 25 13:57:24 2022
 @author: eyu
 """
 
-from Simulation import Simulation
+from abstractDynamics.Simulation import Simulation
 from SpringDynamics import SpringDynamics, SpringlessDynamics
-from FlowProvider import FlowSignalFromFile, ConstantFlowSignal
-from DefaultOutputPlotter import DefaultOutputPlotter
-from NameToHeaderMap import NameToHeaderMap
+from hpuDynamics.FlowProvider import FlowSignalFromFile, ConstantFlowSignal
+from plotting.DefaultOutputPlotter import DefaultOutputPlotter
+from hpuDynamics.NameToHeaderMap import NameToHeaderMap
 import scipy.signal
 
 from pyqtgraph.Qt import QtGui, QtCore

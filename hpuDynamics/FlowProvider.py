@@ -8,7 +8,8 @@ Created on Fri Mar 25 13:25:04 2022
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
-from ExternalSignal import ExternalSignalProvider
+from abstractDynamics.ExternalSignal import ExternalSignalProvider
+from util.FunctionGenerator import FunctionGenerator
 
 class FlowProvider(ExternalSignalProvider):
     def getName(self):
@@ -45,3 +46,15 @@ class ConstantFlowSignal(FlowProvider):
         
     def getSignal(self, state, t):
         return self.value
+
+class FlowFunctionGenerator(FlowProvider):
+    def __init__(self, offset, amplitude=0, frequency=0, periodOffset=0):
+        self.functionGenerator = FunctionGenerator()
+        self.functionGenerator.setParameters(offset, amplitude, frequency, periodOffset)
+    
+    def setModeByName(self, name : str):
+        mode = FunctionGenerator.modeNameMap[name]
+        self.functionGenerator.useMode(mode)
+        
+    def getSignal(self, state, t):
+        return self.functionGenerator.getValueAtTime(t)

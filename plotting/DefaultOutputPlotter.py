@@ -9,24 +9,16 @@ from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.dockarea import *
-from pyqSlider import Slider
-from StateUnitProperties import StateUnitProperties
-
-class SliderWithLines:
-    def __init__(self, lines, minVal, maxVal):
-        self.slider = Slider(minVal, maxVal)
-        self.slider.slider.valueChanged.connect(self.sliderUpdate)
-        self.lines = lines
-        
-    def sliderUpdate(self):
-        idx = self.slider.x
-        for line in self.lines:
-            line.setValue(idx)
+from plotting.pyqSlider import Slider
+from abstractDynamics.StateUnitProperties import StateUnitProperties
+from plotting.TimeHistorySlider import TimeHistorySlider
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QSizePolicy, QSlider, QSpacerItem, \
+    QVBoxLayout, QWidget
 
 class DefaultOutputPlotter():
     def __init__(self, name, timeHistory, outputHistory, stateUnitProperties : StateUnitProperties):
         self.name = name
-        self.logNamesToPlot = outputHistory.keys()
+        self.logNamesToPlot = stateUnitProperties.keys()
         pg.setConfigOption('foreground', 'k')
         pg.setConfigOption('background', 'w')
         
@@ -48,6 +40,9 @@ class DefaultOutputPlotter():
         self.win.setWindowTitle(self.name)
         pg.setConfigOptions(antialias=True)
         
+        self.timeHistorySlider = TimeHistorySlider(maxTime=timeHistory[-1], dt=(timeHistory[1] - timeHistory[0]))
+        self.timeHistorySlider.setModelReference(self.models)
+        
         # Default Params
         self.defaultColor = (0, 140, 170)
         self.mirrorColor = (190, 75, 50)
@@ -61,12 +56,12 @@ class DefaultOutputPlotter():
         layout = pg.LayoutWidget()
         rowIndex = 0
         layout.addLabel(self.name + ": ", colspan=1)
-        # layout.nextRow()
-        
-        lines = []
-        # slider = SliderWithLines(lines, 0, self.timeHistory.size)
-        
-        # layout.addWidget(slider.slider, colspan=2)
+        layout.nextRow()
+                
+        layout.addWidget(self.timeHistorySlider.getSliderWidget(), colspan=2)
+        layout.nextRow()
+        layout.addWidget(self.timeHistorySlider.getPrevButtonWidget())
+        layout.addWidget(self.timeHistorySlider.getNextButtonWidget())
         layout.nextRow()
         
         for logName in self.logNamesToPlot:
@@ -77,19 +72,21 @@ class DefaultOutputPlotter():
             p1.addLegend()
             model = p1.plot(y=self.outputHistory[logName],
                     x=self.timeHistory,
-                    pen=self.defaultColor, 
-                    name = 'time')
-            # p1.plot(y=data.getAverageTimePlotForName(logName), pen=self.defaultColor, name = 'avg')
-            # p1.plot(y=data.getMaxTimePlotForName(logName), pen=self.defaultColor, name = 'max')
+                    pen=self.defaultColor)
             p1.showGrid(x = True, y = True, alpha = 0.3)                                        
             
             # Line on x
-            line = pg.InfiniteLine(angle=90, movable=False, pos=0)
-            p1.addItem(line)
-            lines.append(line)
+            self.timeHistorySlider.addLineToPlot(p1)
+
+            # Wrapper for plot
+            verticalLayout = layout.addLayout()
+            verticalLayout.addWidget(p1)
+            verticalLayout.nextRow()
+            text = self.timeHistorySlider.createAndGetTextForPlot(None, logName)
+            verticalLayout.addWidget(text)
             
             # layout stuff
-            layout.addWidget(p1)
+            # layout.addWidget(p1)
             self.plots.append(p1)
             self.models[logName] = model
             
@@ -116,3 +113,6 @@ class DefaultOutputPlotter():
 
     def getLayout(self):
         return self.layout
+
+    def getTimeDataManager(self):
+        return self.timeHistorySlider

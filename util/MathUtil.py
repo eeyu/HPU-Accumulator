@@ -12,6 +12,21 @@ def findNearestValueInArray(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
+def findLowerBoundValueInIncreasingArray(array, value, step):
+    minimum = array[0]
+    difference = value - minimum
+    index = int(difference / step)
+    return array[index], index
+
+# For an ordered, increasing driving array
+def quickInterp(value, drivingArray, drivenArray, step):
+    lowerDrivingValue, lowerDrivingIndex = findLowerBoundValueInIncreasingArray(drivingArray, value, step)
+    scale = (value - lowerDrivingValue) / step
+    
+    lowerDrivenValue = drivenArray[lowerDrivingIndex]
+    upperDrivenValue = drivenArray[lowerDrivingIndex + 1]
+    return lowerDrivenValue + scale * (upperDrivenValue - lowerDrivenValue)
+
 # def interpolateFromOrderedDrivingArray(drivingArray, value, drivenArray):
     # nearestDrivingValue, nearestDrivingIndex = findNearest(drivingArray, value)
     # nearestValueIsLarger = nearestDrivingValue > value

@@ -1,4 +1,4 @@
-from HPUNozzlelessDynamics import HPUDynamicsNoNozzlePhysics
+from hpuDynamics.HPUNozzlelessDynamics import HPUDynamicsNoNozzlePhysics
 import numpy as np
 
 initialPressure = 10.0

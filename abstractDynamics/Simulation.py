@@ -6,7 +6,7 @@ Created on Fri Mar 25 10:39:39 2022
 """
 
 import numpy as np
-from Dynamics import Dynamics
+from abstractDynamics.Dynamics import Dynamics
 
 class Simulation():
     def __init__(self, dynamics : Dynamics):
